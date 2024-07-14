@@ -13,17 +13,17 @@ public class OrderSyncService : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        using (var scope = _serviceProvider.CreateScope())
-        {
-            try
-            {
-                var orderService = scope.ServiceProvider.GetRequiredService<IOrderService>();
-                await orderService.Init();
-            }
-            catch (Exception ex)
-            {
+        //using (var scope = _serviceProvider.CreateScope())
+        //{
+        //    try
+        //    {
+        //        var orderService = scope.ServiceProvider.GetRequiredService<IOrderService>();
+        //        await orderService.Init();
+        //    }
+        //    catch (Exception ex)
+        //    {
 
-            }
-        }
+        //    }
+        //}
     }
 }

@@ -28,7 +28,7 @@ public class OrderService : IOrderService
             await Task.Delay(TimeSpan.FromSeconds(10));
 
             _systemstContext.Entry(apiloConfig).Reload();
-            if (apiloConfig.ApiloDatabases == null || apiloConfig.SyncStocksMin == 0) continue;
+            if (apiloConfig.ApiloDatabases == null || apiloConfig.SyncOrdersMin == 0) continue;
 
             var ordersListObject = await _apiloOrderService.GetSimpleListOfOrders(apiloConfig);
             if (!ordersListObject.Success) throw new Exception(ordersListObject.Message);

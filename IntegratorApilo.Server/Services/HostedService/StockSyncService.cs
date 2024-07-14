@@ -1,4 +1,6 @@
-﻿namespace IntegratorApilo.Server.Services.HostedService;
+﻿using IntegratorApilo.Server.Services.StockService;
+
+namespace IntegratorApilo.Server.Services.HostedService;
 
 public class StockSyncService : BackgroundService
 {
@@ -11,10 +13,10 @@ public class StockSyncService : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        //using (var scope = _serviceProvider.CreateScope())
-        //{
-        //    var orderService = scope.ServiceProvider.GetRequiredService<IOrderService>();
-        //    await orderService.Init();
-        //}
+        using (var scope = _serviceProvider.CreateScope())
+        {
+            var stockService = scope.ServiceProvider.GetRequiredService<IStockService>();
+            await stockService.Init();
+        }
     }
 }

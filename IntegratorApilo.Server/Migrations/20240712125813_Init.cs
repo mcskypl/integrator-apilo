@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace IntegratorApilo.Server.Migrations.SystemstData
+namespace IntegratorApilo.Server.Migrations
 {
     /// <inheritdoc />
     public partial class Init : Migration
@@ -30,7 +30,8 @@ namespace IntegratorApilo.Server.Migrations.SystemstData
                     REFRESH_TOKEN_EXP = table.Column<DateTime>(type: "TIMESTAMP", nullable: true),
                     SYNC_ORDERS_MIN = table.Column<int>(type: "INTEGER", nullable: false),
                     SYNC_STOCKS_MIN = table.Column<int>(type: "INTEGER", nullable: false),
-                    LAST_UPDATED_AT = table.Column<DateTime>(type: "TIMESTAMP", nullable: false)
+                    LAST_UPDATED_AT = table.Column<DateTime>(type: "TIMESTAMP", nullable: false),
+                    ID_MAGAZYN_STOCKS = table.Column<int>(type: "INTEGER", nullable: true)
                 },
                 constraints: table =>
                 {

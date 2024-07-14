@@ -1,7 +1,9 @@
-﻿namespace IntegratorApilo.Server.Services.ApiloWarehouseService;
+﻿using static IntegratorApilo.Shared.Apilo.ApiloProducts;
+
+namespace IntegratorApilo.Server.Services.ApiloWarehouseService;
 
 public interface IApiloWarehouseService
 {
-    Task<ServiceResponse<ApiloProducts>> GetProductsList(int idConfig);
-    Task<ServiceResponse<ApiloOrders>> UpdateProducts(ApiloConfig apiloConfig);
+    Task<ServiceResponse<List<ApiloProduct>>> GetProductsList(int idConfig);
+    Task<ServiceResponse<bool>> UpdateProducts(int idConfig, ApiloProduct products);
 }

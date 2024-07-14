@@ -28,7 +28,7 @@ public class DataContext : DbContext
 
         modelBuilder.Entity<Stanmag>(entity =>
         {
-            entity.HasKey(e => e.IdStanmag);
+            entity.HasKey(e => new { e.IdKartoteka, e.IdMagazyn });
             entity.HasOne(e => e.Kartoteka)
                   .WithOne(e => e.Stanmag)
                   .HasForeignKey<Stanmag>(e => e.IdKartoteka);

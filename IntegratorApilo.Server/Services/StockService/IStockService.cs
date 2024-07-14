@@ -3,5 +3,5 @@
 public interface IStockService
 {
     Task<ServiceResponse<bool>> Init();
-    Task<ServiceResponse<bool>> GetStocksFromDatabase();
+    Task<ServiceResponse<List<Kartoteka>>> GetStocksFromDatabase(int idConfig, int idDatabase);
 }

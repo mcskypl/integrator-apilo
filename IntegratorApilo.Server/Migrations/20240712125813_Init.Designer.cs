@@ -11,9 +11,9 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace IntegratorApilo.Server.Migrations
 {
-    [DbContext(typeof(DataContext))]
-    [Migration("20240710131830_LastUpdatedAt2")]
-    partial class LastUpdatedAt2
+    [DbContext(typeof(SystemstDataContext))]
+    [Migration("20240712125813_Init")]
+    partial class Init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -74,7 +74,11 @@ namespace IntegratorApilo.Server.Migrations
                         .HasColumnType("VARCHAR(200)")
                         .HasColumnName("CLIENT_SECRET");
 
-                    b.Property<DateTime?>("LastUpdatedAt")
+                    b.Property<int?>("IdMagazynStocks")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("ID_MAGAZYN_STOCKS");
+
+                    b.Property<DateTime>("LastUpdatedAt")
                         .HasColumnType("TIMESTAMP")
                         .HasColumnName("LAST_UPDATED_AT");
 
@@ -98,6 +102,47 @@ namespace IntegratorApilo.Server.Migrations
                     b.HasKey("IdConfig");
 
                     b.ToTable("XXX_APILO_CONFIG");
+                });
+
+            modelBuilder.Entity("IntegratorApilo.Shared.Streamsoft.ApiloDatabase", b =>
+                {
+                    b.Property<int>("IdDatabase")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("ID_DATABASE")
+                        .HasAnnotation("Fb:ValueGenerationStrategy", FbValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("ConnectionString")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("VARCHAR(1000)")
+                        .HasColumnName("CONNECTION_STRING");
+
+                    b.Property<int>("IdConfig")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("ID_CONFIG");
+
+                    b.HasKey("IdDatabase");
+
+                    b.HasIndex("IdConfig");
+
+                    b.ToTable("XXX_APILO_DATABASE");
+                });
+
+            modelBuilder.Entity("IntegratorApilo.Shared.Streamsoft.ApiloDatabase", b =>
+                {
+                    b.HasOne("IntegratorApilo.Shared.Streamsoft.ApiloConfig", "ApiloConfig")
+                        .WithMany("ApiloDatabases")
+                        .HasForeignKey("IdConfig")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ApiloConfig");
+                });
+
+            modelBuilder.Entity("IntegratorApilo.Shared.Streamsoft.ApiloConfig", b =>
+                {
+                    b.Navigation("ApiloDatabases");
                 });
 #pragma warning restore 612, 618
         }

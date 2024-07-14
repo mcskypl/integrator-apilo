@@ -4,19 +4,16 @@ using FirebirdSql.EntityFrameworkCore.Firebird.Metadata;
 using IntegratorApilo.Server.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace IntegratorApilo.Server.Migrations.SystemstData
+namespace IntegratorApilo.Server.Migrations
 {
     [DbContext(typeof(SystemstDataContext))]
-    [Migration("20240711122726_Init")]
-    partial class Init
+    partial class SystemstDataContextModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -73,6 +70,10 @@ namespace IntegratorApilo.Server.Migrations.SystemstData
                         .HasMaxLength(200)
                         .HasColumnType("VARCHAR(200)")
                         .HasColumnName("CLIENT_SECRET");
+
+                    b.Property<int?>("IdMagazynStocks")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("ID_MAGAZYN_STOCKS");
 
                     b.Property<DateTime>("LastUpdatedAt")
                         .HasColumnType("TIMESTAMP")

@@ -2,6 +2,7 @@
 using IntegratorApilo.Shared.Streamsoft;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using static IntegratorApilo.Shared.Apilo.ApiloProducts;
 
 namespace IntegratorApilo.Server.Controllers;
 
@@ -40,7 +41,7 @@ public class ApiloController : ControllerBase
 
     [HttpGet]
     [Route("products")]
-    public async Task<ActionResult<ServiceResponse<ApiloProducts>>> GetApiloProducts(int apiloConfig)
+    public async Task<ActionResult<ServiceResponse<List<ApiloProduct>>>> GetApiloProducts(int apiloConfig)
     {
         var result = await _apiloWarehouseService.GetProductsList(apiloConfig);
         return Ok(result);

@@ -4,7 +4,7 @@ namespace IntegratorApilo.Shared.Apilo;
 
 public class ApiloProducts
 {
-    public class Product
+    public class ApiloProduct
     {
         [JsonPropertyName("id")] public int? Id { get; set; }
         [JsonPropertyName("sku")] public string? Sku { get; set; }
@@ -20,6 +20,6 @@ public class ApiloProducts
         [JsonPropertyName("status")] public int? Status { get; set; }
     }
 
-    [JsonPropertyName("products")] public List<Product>? Products { get; set; }
+    [JsonPropertyName("products")] public List<ApiloProduct>? Products { get; set; }
     [JsonPropertyName("totalCount")] public int TotalCount { get; set; }
 }
