@@ -1,6 +1,4 @@
-﻿using IntegratorApilo.Shared.Streamsoft;
-
-namespace IntegratorApilo.Server.Data;
+﻿namespace IntegratorApilo.Server.Data;
 
 public class SystemstDataContext : DbContext
 {
@@ -35,9 +33,11 @@ public class SystemstDataContext : DbContext
             entity.HasKey(e => e.IdDatabase);
             entity.Property(e => e.IdDatabase).ValueGeneratedOnAdd();
             entity.Property(e => e.IdConfig).IsRequired();
+            entity.Property(e => e.DatabaseName).HasMaxLength(50);
             entity.Property(e => e.ConnectionString).IsRequired().HasMaxLength(1000);
         });
     }
 
     public DbSet<ApiloConfig> ApiloConfig { get; set; }
+    public DbSet<ApiloDatabase> ApiloDatabase { get; set; }
 }

@@ -1,5 +1,4 @@
-﻿using IntegratorApilo.Shared.Streamsoft;
-using Microsoft.Extensions.Logging;
+﻿using static IntegratorApilo.Shared.Apilo.ApiloProducts;
 
 namespace IntegratorApilo.Server.Services.StockService;
 
@@ -18,69 +17,90 @@ public class StockService : IStockService
 
     public async Task<ServiceResponse<bool>> Init()
     {
-        _logger.LogInformation($"Pobieranie konfiguracji z bazy...");
-        var apiloConfig = await _systemstContext.ApiloConfig.Include(e => e.ApiloDatabases).FirstOrDefaultAsync()
-            ?? throw new Exception("SYSTEMST.XXX_APILO_CONFIG is null");
-        _logger.LogInformation($"Pobrano konfigurację {apiloConfig.AppName}");
-
         while (true)
         {
-            try
+            _logger.LogInformation($"Pobieranie konfiguracji z bazy...");
+            var apiloConfigs = await _systemstContext.ApiloConfig.Include(e => e.ApiloDatabases).ToListAsync() ?? throw new Exception("SYSTEMST.XXX_APILO_CONFIG is null");
+
+            foreach (var apiloConfig in apiloConfigs)
             {
-                _systemstContext.Entry(apiloConfig).Reload();
+                _logger.LogInformation($"Pobrano konfigurację {apiloConfig.AppName}");
 
-                if (apiloConfig.ApiloDatabases == null || apiloConfig.SyncStocksMin == 0) 
+                try
                 {
-                    await Task.Delay(TimeSpan.FromMinutes(1));
-                    continue;
-                }
-
-                _logger.LogInformation($"Pobieranie kartotek z Apilo...");
-                var produktyApilo = await _apiloWarehouseService.GetProductsList(1);
-                _logger.LogInformation($"Pobrano kartotek z Apilo: {produktyApilo.Data.Count()}");
-
-                var kartoteki = await GetStocksFromDatabase(1, 1);
-                _logger.LogInformation($"Pobrano kartotek z bazy Streamsoft: {kartoteki.Data.Count()}");
-                
-
-                foreach (var kartoteka in kartoteki.Data)
-                {
-                    try
+                    if (apiloConfig.ApiloDatabases == null || apiloConfig.SyncStocksMin == 0)
                     {
-                        var produktApilo = produktyApilo.Data.Where(x => x.Sku == kartoteka.Indeks).FirstOrDefault();
+                        await Task.Delay(TimeSpan.FromMinutes(1));
+                        continue;
+                    }
 
-                        if (produktApilo == null)
+                    var database = apiloConfig.ApiloDatabases.FirstOrDefault(x => x.SyncStocks != 0);
+                    if (database == null) continue;
+
+                    _logger.LogInformation($"Synchronizacja stanów z bazy {database.DatabaseName}");
+
+                    _logger.LogInformation($"Pobieranie kartotek z Apilo...");
+                    var produktyApilo = await _apiloWarehouseService.GetProductsList(apiloConfig.IdConfig);
+                    _logger.LogInformation($"Pobrano kartotek z Apilo: {produktyApilo.Data.Count()}");
+
+                    _logger.LogInformation($"Pobieranie kartotek z bazy Streamsoft...");
+                    var kartoteki = await GetStocksFromDatabase(apiloConfig.IdConfig, database.IdDatabase);
+                    _logger.LogInformation($"Pobrano kartotek z bazy Streamsoft: {kartoteki.Data.Count()}");
+
+                    var productsToUpdate = new List<ApiloProduct>();
+
+                    foreach (var kartoteka in kartoteki.Data)
+                    {
+                        try
                         {
-                            _logger.LogInformation($"Nie znaleziono indeksu {kartoteka.Indeks} w bazie Apilo");
-                            continue;
+                            var produktApilo = produktyApilo.Data.Where(x => x.Sku == kartoteka.Indeks).FirstOrDefault();
+
+                            if (produktApilo == null)
+                            {
+                                _logger.LogInformation($"Nie znaleziono indeksu {kartoteka.Indeks} w bazie Apilo");
+                                continue;
+                            }
+
+                            if (kartoteka.Stanmag == null) continue;
+
+                            if (produktApilo.Quantity != kartoteka.Stanmag.Standysp)
+                            {
+                                var apiloProduct = new ApiloProduct()
+                                {
+                                    Id = produktApilo.Id,
+                                    Quantity = (int)kartoteka.Stanmag.Standysp
+                                };
+
+                                productsToUpdate.Add(apiloProduct);
+
+                                _logger.LogInformation($"Do aktualizacji ilość produkt {kartoteka.Indeks} [{produktApilo.Quantity}] -> [{kartoteka.Stanmag.Standysp}]");
+                            }
+                            else
+                            {
+                                _logger.LogInformation($"Bez zmian w ilości produktu {kartoteka.Indeks} [{produktApilo.Quantity}] -> [{kartoteka.Stanmag.Standysp}]");
+                            }
                         }
-
-                        if (kartoteka.Stanmag == null) continue;
-
-                        if (produktApilo.Quantity != kartoteka.Stanmag.Standysp)
+                        catch (Exception ex)
                         {
-                            produktApilo.Quantity = (int)produktApilo.Quantity;
-                            await _apiloWarehouseService.UpdateProducts(1, produktApilo);
-
-                            _logger.LogInformation($"Do aktualizacji ilość produkt {kartoteka.Indeks} [{produktApilo.Quantity}] -> [{kartoteka.Stanmag.Standysp}]");
-                        }
-                        else
-                        {
-                            _logger.LogInformation($"Bez zmian w ilości produktu {kartoteka.Indeks} [{produktApilo.Quantity}] -> [{kartoteka.Stanmag.Standysp}]");
+                            _logger.LogError($"{kartoteka.Indeks} - {ex.Message}");
                         }
                     }
-                    catch (Exception ex)
+
+                    if (productsToUpdate.Count() > 0)
                     {
-                        _logger.LogError($"{kartoteka.Indeks} - {ex.Message}");
+                        var updateProducts = await _apiloWarehouseService.UpdateProducts(apiloConfig.IdConfig, productsToUpdate);
+
+                        if (updateProducts.Success) _logger.LogInformation($"Zaktualizowano produktów {updateProducts.Data}");
+                        else _logger.LogError($"Błąd w trakcie aktualizowania produktów {updateProducts.Message}");
                     }
                 }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"{ex.Message}");
+                catch (Exception ex)
+                {
+                    _logger.LogError($"{ex.Message}");
+                }
             }
 
-            await Task.Delay(TimeSpan.FromMinutes(1));
+            await Task.Delay(TimeSpan.FromMinutes(10));
         }
     }
 
@@ -90,7 +110,7 @@ public class StockService : IStockService
 
         try
         {
-            var apiloConfig = await _systemstContext.ApiloConfig.Include(e => e.ApiloDatabases).FirstOrDefaultAsync(x => x.IdConfig == idConfig) 
+            var apiloConfig = await _systemstContext.ApiloConfig.Include(e => e.ApiloDatabases).FirstOrDefaultAsync(x => x.IdConfig == idConfig)
                 ?? throw new Exception("SYSTEMST.XXX_APILO_CONFIG is null");
 
             string? connectionString = apiloConfig.ApiloDatabases.FirstOrDefault(x => x.IdDatabase == idDatabase).ConnectionString;

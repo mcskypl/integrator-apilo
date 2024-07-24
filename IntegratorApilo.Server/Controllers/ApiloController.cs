@@ -1,4 +1,5 @@
-﻿using IntegratorApilo.Server.Services.ApiloOrderService;
+﻿using IntegratorApilo.Server.Services.ApiloFinanceDocumentService;
+using IntegratorApilo.Server.Services.ApiloOrderService;
 using IntegratorApilo.Shared.Streamsoft;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -13,14 +14,17 @@ public class ApiloController : ControllerBase
     private readonly IApiloAuthorizationService _apiloAuthorizationService;
     private readonly IApiloOrderService _apiloOrderService;
     private readonly IApiloWarehouseService _apiloWarehouseService;
+    private readonly IApiloFinanceDocumentService _apiloFinanceDocumentService;
 
     public ApiloController(IApiloAuthorizationService apiloAuthorizationService
                          , IApiloOrderService apiloOrderService
-                         , IApiloWarehouseService apiloWarehouseService)
+                         , IApiloWarehouseService apiloWarehouseService
+                         , IApiloFinanceDocumentService apiloFinanceDocumentService)
     {
         _apiloAuthorizationService = apiloAuthorizationService;
         _apiloOrderService = apiloOrderService;
         _apiloWarehouseService = apiloWarehouseService;
+        _apiloFinanceDocumentService = apiloFinanceDocumentService;
     }
 
     [HttpGet]
@@ -33,9 +37,17 @@ public class ApiloController : ControllerBase
 
     [HttpGet]
     [Route("orders")]
-    public async Task<ActionResult<ServiceResponse<ApiloOrders>>> GetApiloOrders(ApiloConfig apiloConfig)
+    public async Task<ActionResult<ServiceResponse<ApiloShop>>> GetApiloOrders(int idShop)
     {
-        var result = await _apiloOrderService.GetSimpleListOfOrders(apiloConfig);
+        var result = await _apiloOrderService.GetSimpleListOfOrders(idShop);
+        return Ok(result);
+    }
+
+    [HttpGet]
+    [Route("status")]
+    public async Task<ActionResult<ServiceResponse<List<ApiloOrderStatus>>>> GetApiloStatus(int idShop)
+    {
+        var result = await _apiloOrderService.GetOrderStatus(idShop);
         return Ok(result);
     }
 
@@ -44,6 +56,22 @@ public class ApiloController : ControllerBase
     public async Task<ActionResult<ServiceResponse<List<ApiloProduct>>>> GetApiloProducts(int apiloConfig)
     {
         var result = await _apiloWarehouseService.GetProductsList(apiloConfig);
+        return Ok(result);
+    }
+
+    [HttpGet]
+    [Route("order/{idApiloOrder}")]
+    public async Task<ActionResult<ServiceResponse<List<ApiloProduct>>>> GetApiloProducts(int idShop, string idApiloOrder)
+    {
+        var result = await _apiloOrderService.GetOrderDetails(idShop, idApiloOrder);
+        return Ok(result);
+    }
+
+    [HttpGet]
+    [Route("finance-documents")]
+    public async Task<ActionResult<ServiceResponse<List<ApiloProduct>>>> GetFinanceDocuments(int idShop)
+    {
+        var result = await _apiloFinanceDocumentService.GetListOfAccountingDocuments(idShop);
         return Ok(result);
     }
 }

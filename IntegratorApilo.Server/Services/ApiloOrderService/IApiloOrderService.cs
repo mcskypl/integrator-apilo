@@ -2,5 +2,7 @@
 
 public interface IApiloOrderService
 {
-    Task<ServiceResponse<ApiloOrders>> GetSimpleListOfOrders(ApiloConfig apiloConfig);
+    Task<ServiceResponse<ApiloOrders>> GetSimpleListOfOrders(int idShop);
+    Task<ServiceResponse<ApiloOrderDetails>> GetOrderDetails(int idShop, string idApiloOrder);
+    Task<ServiceResponse<List<ApiloOrderStatus>>> GetOrderStatus(int idShop);
 }

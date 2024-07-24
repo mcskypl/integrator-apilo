@@ -1,4 +1,5 @@
 global using IntegratorApilo.Server.Data;
+global using IntegratorApilo.Server.Services.AdminService;
 global using IntegratorApilo.Server.Services.ApiloAuthorizationService;
 global using IntegratorApilo.Server.Services.ApiloConnectionService;
 global using IntegratorApilo.Server.Services.ApiloOrderService;
@@ -10,10 +11,12 @@ global using IntegratorApilo.Shared;
 global using IntegratorApilo.Shared.Apilo;
 global using IntegratorApilo.Shared.Streamsoft;
 global using Microsoft.EntityFrameworkCore;
-global using RestSharp;
 global using NLog;
 global using NLog.Web;
+global using RestSharp;
 using IntegratorApilo.Server;
+using IntegratorApilo.Server.Services.ApiloFinanceDocumentService;
+using IntegratorApilo.Server.Services.InvoiceService;
 
 var logger = NLog.LogManager.Setup().LoadConfigurationFromAppSettings().GetCurrentClassLogger();
 logger.Debug("Uruchamianie aplikacji");
@@ -29,7 +32,15 @@ builder.Services.AddDbContext<SystemstDataContext>(options =>
     options.UseFirebird(builder.Configuration.GetConnectionString("SystemstConnection"));
 });
 
+builder.Services.AddDbContext<MainDataContext>(options =>
+{
+    options.UseFirebird(builder.Configuration.GetConnectionString("SystemstConnection"));
+});
+
 // Add services to the container.
+
+builder.Services.AddControllersWithViews();
+builder.Services.AddRazorPages();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -49,15 +60,20 @@ builder.Services.AddScoped<IApiloAuthorizationService, ApiloAuthorizationService
 builder.Services.AddScoped<IApiloOrderService, ApiloOrderService>();
 builder.Services.AddScoped<IApiloWarehouseService, ApiloWarehouseService>();
 builder.Services.AddScoped<IApiloConnectionService, ApiloConnectionService>();
+builder.Services.AddScoped<IApiloFinanceDocumentService, ApiloFinanceDocumentService>();
+
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IStockService, StockService>();
+builder.Services.AddScoped<IAdminService, AdminService>();
+builder.Services.AddScoped<IInvoiceService, InvoiceService>();
 
 builder.Services.AddHostedService<OrderSyncService>();
 builder.Services.AddHostedService<StockSyncService>();
+builder.Services.AddHostedService<InvoiceHostedService>();
 
 var app = builder.Build();
 
-app.MigrateDatabase<SystemstDataContext>();
+app.MigrateDatabase<MainDataContext>();
 
 //// Configure the HTTP request pipeline.
 //if (app.Environment.IsDevelopment())
@@ -66,13 +82,19 @@ app.MigrateDatabase<SystemstDataContext>();
 //    app.UseSwaggerUI();
 //}
 
+app.UseWebAssemblyDebugging();
 app.UseSwagger();
 app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
 
+app.UseBlazorFrameworkFiles();
+app.UseStaticFiles();
+
 app.UseAuthorization();
 
+app.MapRazorPages();
 app.MapControllers();
+app.MapFallbackToFile("index.html");
 
 app.Run();

@@ -37,19 +37,24 @@ public class DataContext : DbContext
         modelBuilder.Entity<ApiloKontrah>().HasNoKey();
         modelBuilder.Entity<UrzzewnaglAdd9>().HasNoKey();
         modelBuilder.Entity<UrzzewpozAdd9>().HasNoKey();
-        modelBuilder.Entity<UrzzewnaglRealizZamwew>().HasNoKey();
+        modelBuilder.Entity<UrzzewnaglRealizZam>().HasNoKey();
         modelBuilder.Entity<Urzzewnagl>().HasKey(e => e.IdUrzzewnagl);
+        modelBuilder.Entity<Nagl>().HasKey(e => e.IdNagl);
+        modelBuilder.Entity<Naglzamodb>().HasKey(e => e.IdNaglzamodb);
     }
 
     // Tables
     public DbSet<Kartoteka> Kartoteka { get; set; }
     public DbSet<Stanmag> Stanmag { get; set; }
+    public DbSet<Urzzewnagl> Urzzewnagl { get; set; }
+    public DbSet<Nagl> Nagl { get; set; }
+    public DbSet<Naglzamodb> Naglzamodb { get; set; }
 
     // Procedures
     public DbSet<ApiloKontrah> ApiloKontrahs { get; set; }
     public DbSet<UrzzewnaglAdd9> UrzzewnaglAdd9s { get; set; }
     public DbSet<UrzzewpozAdd9> UrzzewpozAdd9s { get; set; }
-    public DbSet<UrzzewnaglRealizZamwew> UrzzewnaglRealizZamwews { get; set; }
+    public DbSet<UrzzewnaglRealizZam> UrzzewnaglRealizZams { get; set; }
 
     // Procedures body
     public async Task<ApiloKontrah?> ApiloKontrah(string nazwaskr, string telefon, string email, string kodKraj, string companyname, string customername, string nip, string miejscowosc, string kodpocztowy, string ulica)
@@ -172,15 +177,15 @@ public class DataContext : DbContext
         return results;
     }
 
-    public async Task<UrzzewnaglRealizZamwew?> UrzzewnaglRealizZamwew(UrzzewnaglRealizZamwewRequest data)
+    public async Task<UrzzewnaglRealizZam?> UrzzewnaglRealizZam(UrzzewnaglRealizZamRequest data)
     {
         FbParameter[] @params =  {
                 new FbParameter("@AID_URZZEWNAGL", data.AidUrzzewnagl),
                 new FbParameter("@KASUJURZZEWNAGL", data.Kasujurzzewnagl),
             };
 
-        UrzzewnaglRealizZamwew? results = await UrzzewnaglRealizZamwews
-            .FromSqlRaw("SELECT * FROM URZZEWNAGL_REALIZ_ZAMWEW(@AID_URZZEWNAGL, @KASUJURZZEWNAGL)", @params)
+        UrzzewnaglRealizZam? results = await UrzzewnaglRealizZams
+            .FromSqlRaw("SELECT * FROM URZZEWNAGL_REALIZ_ZAM(@AID_URZZEWNAGL, @KASUJURZZEWNAGL)", @params)
             .FirstOrDefaultAsync();
 
         return results;

@@ -1,0 +1,142 @@
+﻿@page "/settings"
+@inject IApiloConfigService ApiloConfigService
+@using IntegratorApilo.Client.Services.ApiloConfigService
+@using IntegratorApilo.Shared.Streamsoft
+
+<PageTitle>Ustawienia</PageTitle>
+
+<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="10px" class="mt-2 mb-4">
+    <RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" Text="Dodaj nowy sklep Apilo" Click="@InsertRow" Disabled="@(editMode == DataGridEditMode.Single && ordersToInsert.Count() > 0)" />
+</RadzenStack>
+
+<RadzenDataGrid @ref="ApiloShop" AllowAlternatingRows="false" AllowFiltering="true" AllowPaging="true" PageSize="5" AllowSorting="true"
+                Data="@orders" TItem="ApiloShop" ColumnWidth="200px" EditMode="@editMode" RowCreate="@OnCreateRow" RowUpdate="@OnUpdateRow">
+
+    <Columns>
+        <RadzenDataGridColumn Property="IdShop" Title="Id" />
+
+        <RadzenDataGridColumn Property="ShopName" Title="Sklep">
+            <EditTemplate Context="order">
+                <RadzenTextBox @bind-Value="order.ShopName" Name="ShopName"/>
+                <RadzenRequiredValidator Text="Proszę podać nazwę sklepu" Component="ShopName" Popup="true" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn Property="Description" Title="Opis">
+            <EditTemplate Context="order">
+                <RadzenTextBox @bind-Value="order.Description" Name="Description" />
+                <RadzenRequiredValidator Text="Proszę podać opis" Component="Description" Popup="true" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn Property="UpdatedAt" Title="Zaktualizowano" />
+        <RadzenDataGridColumn Property="CreatedAt" Title="Utworzono" />
+
+        <RadzenDataGridColumn Property="Description" Title="Opis">
+            <Template>
+                <button class="btn btn-primary" @* @onclick="(() => ShowDetails(order))" *@>Szczegóły</button>
+            </Template>
+        </RadzenDataGridColumn>
+
+
+
+        <RadzenDataGridColumn Context="order" Filterable="false" Sortable="false" TextAlign="TextAlign.Right" Frozen="true" FrozenPosition="FrozenColumnPosition.Right">
+            <Template Context="ApiloShop">
+                <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@(args => EditRow(ApiloShop))" @onclick:stopPropagation="true">
+                </RadzenButton>
+                <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Variant.Flat" Shade="Shade.Lighter" Size="ButtonSize.Medium" class="my-1 ms-1" Click="@(args => DeleteRow(ApiloShop))" @onclick:stopPropagation="true">
+                </RadzenButton>
+            </Template>
+            <EditTemplate Context="ApiloShop">
+                <RadzenButton Icon="check" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@((args) => SaveRow(ApiloShop))" aria-label="Save">
+                </RadzenButton>
+                <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Medium" class="my-1 ms-1" Click="@((args) => CancelEdit(ApiloShop))" aria-label="Cancel">
+                </RadzenButton>
+                <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Variant.Flat" Shade="Shade.Lighter" Size="ButtonSize.Medium" class="my-1 ms-1" Click="@(args => DeleteRow(ApiloShop))" aria-label="Delete">
+                </RadzenButton>
+            </EditTemplate>
+        </RadzenDataGridColumn>
+
+    </Columns>
+</RadzenDataGrid>
+
+
+@code {
+    DataGridEditMode editMode = DataGridEditMode.Single;
+
+    RadzenDataGrid<ApiloShop> ApiloShop;
+    IEnumerable<ApiloShop> orders;
+
+    List<ApiloShop> ordersToInsert = new List<ApiloShop>();
+    List<ApiloShop> ordersToUpdate = new List<ApiloShop>();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        var result = await ApiloConfigService.GetApiloConfig();
+        orders = result;
+    }
+
+    void Reset()
+    {
+        ordersToInsert.Clear();
+        ordersToUpdate.Clear();
+    }
+
+    void Reset(ApiloShop order)
+    {
+        ordersToInsert.Remove(order);
+        ordersToUpdate.Remove(order);
+    }
+
+    async Task DeleteRow(ApiloShop order)
+    {
+
+    }
+
+    async Task SaveRow(ApiloShop order)
+    {
+        await ApiloShop.UpdateRow(order);
+    }
+
+    async Task EditRow(ApiloShop order)
+    {
+        if (editMode == DataGridEditMode.Single && ordersToInsert.Count() > 0)
+        {
+            Reset();
+        }
+
+        ordersToUpdate.Add(order);
+        await ApiloShop.EditRow(order);
+    }
+
+    async Task CancelEdit(ApiloShop order)
+    {
+        Reset(order);
+        ApiloShop.CancelEditRow(order);
+
+        var result = await ApiloConfigService.GetApiloConfig();
+        orders = result;
+    }
+
+    async Task InsertRow()
+    {
+        if (editMode == DataGridEditMode.Single)
+        {
+            Reset();
+        }
+
+        var order = new ApiloShop();
+        ordersToInsert.Add(order);
+        await ApiloShop.InsertRow(order);
+    }
+
+    async Task OnCreateRow(ApiloShop order)
+    {
+        var result = await ApiloConfigService.AddApiloShop(order);
+    }
+
+    async Task OnUpdateRow(ApiloShop order)
+    {
+        var result = await ApiloConfigService.UpdateApiloShop(order);
+    }
+}

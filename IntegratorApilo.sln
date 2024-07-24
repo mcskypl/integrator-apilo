@@ -5,7 +5,9 @@ VisualStudioVersion = 17.10.34902.84
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IntegratorApilo.Server", "IntegratorApilo.Server\IntegratorApilo.Server.csproj", "{D2C86091-7D59-40BD-A7CC-374B367E0BE1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IntegratorApilo.Shared", "IntegratorApilo.Shared\IntegratorApilo.Shared.csproj", "{ADCB1B00-D3E7-43F6-BDBC-A867B90DCA63}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IntegratorApilo.Shared", "IntegratorApilo.Shared\IntegratorApilo.Shared.csproj", "{ADCB1B00-D3E7-43F6-BDBC-A867B90DCA63}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IntegratorApilo.Client", "IntegratorApilo.Client\IntegratorApilo.Client.csproj", "{6C9BB9A5-A5D5-4C7B-AB87-D5D6AB65FB7E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{ADCB1B00-D3E7-43F6-BDBC-A867B90DCA63}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ADCB1B00-D3E7-43F6-BDBC-A867B90DCA63}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{ADCB1B00-D3E7-43F6-BDBC-A867B90DCA63}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6C9BB9A5-A5D5-4C7B-AB87-D5D6AB65FB7E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6C9BB9A5-A5D5-4C7B-AB87-D5D6AB65FB7E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6C9BB9A5-A5D5-4C7B-AB87-D5D6AB65FB7E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6C9BB9A5-A5D5-4C7B-AB87-D5D6AB65FB7E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

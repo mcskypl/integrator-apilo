@@ -1,0 +1,26 @@
+﻿@inherits LayoutComponentBase
+<RadzenLayout Style="grid-template-areas: 'rz-sidebar rz-header' 'rz-sidebar rz-body'">
+
+    <RadzenSidebar @bind-Expanded="sidebarExpanded" Style="max-width: 200px;">
+        <RadzenPanelMenu>
+            <NavLink href="settings">
+                <RadzenPanelMenuItem Text="Ustawienia" Icon="account_box" />
+            </NavLink>
+            
+            <NavLink href="weather">
+                <RadzenPanelMenuItem Text="Migracja" Icon="account_box" />
+            </NavLink>
+        </RadzenPanelMenu>
+    </RadzenSidebar>
+
+    <RadzenBody>
+        <div class="rz-p-4">
+            @Body
+        </div>
+    </RadzenBody>
+
+</RadzenLayout>
+
+@code {
+    bool sidebarExpanded = true;
+}

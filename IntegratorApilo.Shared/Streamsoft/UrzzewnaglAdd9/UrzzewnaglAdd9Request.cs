@@ -14,9 +14,9 @@ public class UrzzewnaglAdd9Request
     public string? AodbNrdok { get; set; } = null;
     public DateTime? AodbTermin { get; set; } = null;
     public string? AodbPlatnosc { get; set; } = null;
-    public decimal? AodbSuma { get; set; } = null;
+    public float? AodbSuma { get; set; } = null;
     public int? AodbIlepoz { get; set; } = null;
-    public decimal? AodbGotowka { get; set; } = null;
+    public float? AodbGotowka { get; set; } = null;
     public DateTime? AodbDotData { get; set; } = null;
     public string? AodbDotNazwadok { get; set; } = null;
     public string? AodbDotNrdok { get; set; } = null;
@@ -36,7 +36,7 @@ public class UrzzewnaglAdd9Request
     public string? AodbMagazyn { get; set; } = null;
     public string? AnazwadokDorealiz { get; set; } = null;
     public int? AidWaluta { get; set; } = null;
-    public decimal? Akurs { get; set; } = null;
+    public float? Akurs { get; set; } = null;
     public int? AidZleceniepartiazp { get; set; } = null;
     public string? Aoznjpk { get; set; } = null;
     public string? AodbKodkrajvat { get; set; } = null;

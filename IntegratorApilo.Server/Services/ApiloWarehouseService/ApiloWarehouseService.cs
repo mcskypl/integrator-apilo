@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using IntegratorApilo.Shared.Apilo;
+using System.Text.Json;
 using static IntegratorApilo.Shared.Apilo.ApiloProducts;
 
 namespace IntegratorApilo.Server.Services.ApiloWarehouseService;
@@ -67,34 +68,50 @@ public class ApiloWarehouseService : IApiloWarehouseService
         public int Quantity { get; set; }
     }
 
-    public async Task<ServiceResponse<bool>> UpdateProducts(int idConfig, ApiloProduct products)
+    public async Task<ServiceResponse<int>> UpdateProducts(int idConfig, List<ApiloProduct> products)
     {
         var apiloConfig = await _systemstContext.ApiloConfig.Include(e => e.ApiloDatabases).FirstOrDefaultAsync(x => x.IdConfig == idConfig)
             ?? throw new Exception("SYSTEMST.XXX_APILO_CONFIG is null");
 
-        var result = new ServiceResponse<bool>();
+        var result = new ServiceResponse<int>();
 
         try
         {
-            List<Item> items = new();
+            var productsToUpdate = new List<object>();
 
-            items.Add(new()
+            foreach (var product in products)
             {
-                Id = (int)products.Id,
-                Quantity = (int)products.Quantity-1
-            });
+                var productUpdate = new
+                {
+                    product.Id,
+                    product.Quantity
+                };
 
+                productsToUpdate.Add(productUpdate);
 
+                if (productsToUpdate.Count() >= 512) break;
+            }
 
 
             var request = new RestRequest($"{apiloConfig.ApiAddress}/rest/api/warehouse/product/", Method.Patch);
             request.AddHeader("Authorization", $"Bearer {apiloConfig.AccessToken}");
-            request.AddJsonBody(items);
+            request.AddJsonBody(productsToUpdate);
 
             RestResponse response = await _restClient.ExecuteAsync(request);
+
+            if (response.StatusCode == System.Net.HttpStatusCode.NotModified) result.Data = 0;
+            else if (response.StatusCode == System.Net.HttpStatusCode.OK) result.Data = productsToUpdate.Count();
+            else
+            {
+                var apiloErrorResponse = JsonSerializer.Deserialize<ApiloErrorResponse>(response.Content) ?? throw new Exception("ApiloErrorResponse is null");
+                result.Success = false;
+                result.Message = $"{apiloErrorResponse.Message} | {apiloErrorResponse.Description} | {productsToUpdate.ToString()}";
+            }
         }
         catch (Exception ex)
         {
+            result.Success = false;
+            result.Message = ex.Message;
         }
 
         return result;
