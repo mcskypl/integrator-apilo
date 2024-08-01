@@ -11,18 +11,19 @@ public class OrderSyncService : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        using (var scope = _serviceProvider.CreateScope())
+        while (!stoppingToken.IsCancellationRequested)
         {
-            while (true)
+            using (var scope = _serviceProvider.CreateScope())
             {
+                var orderService = scope.ServiceProvider.GetRequiredService<IOrderService>();
                 try
                 {
-                    var orderService = scope.ServiceProvider.GetRequiredService<IOrderService>();
                     await orderService.Init();
                 }
                 catch (Exception ex)
                 {
-                    await Task.Delay(TimeSpan.FromMinutes(10));
+                    // Czekanie 10 minut przed ponowną próbą
+                    await Task.Delay(TimeSpan.FromMinutes(10), stoppingToken);
                 }
             }
         }

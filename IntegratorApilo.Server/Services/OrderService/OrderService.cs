@@ -73,9 +73,11 @@ public class OrderService : IOrderService
 
                         try
                         {
+                            string idConnection = database.IdConnection.ToString();
+                            
                             using (DataContext context = new DataContext(ConnectionString))
                             {
-                                var urzzewnagl = await context.Urzzewnagl.FirstOrDefaultAsync(u => u.OdbNrdok.Contains(order.Id));
+                                var urzzewnagl = await context.Urzzewnagl.FirstOrDefaultAsync(u => u.OdbNrdok.Contains("APILO" + idConnection + "_" + order.Id));
                                 if (urzzewnagl != null) 
                                 {
                                     _logger.LogInformation("Zamówienie istnieje w urządzeniu zewnętrznym");
@@ -193,6 +195,7 @@ public class OrderService : IOrderService
 
         using (DataContext context = new DataContext(ConnectionString))
         {
+            string idConnection = apiloAccount.IdConnection.ToString();
 
             UrzzewnaglAdd9Request urzzewnaglAdd9Request = new()
             {
@@ -203,7 +206,7 @@ public class OrderService : IOrderService
                 Ajakinumerkontrah = 2,
                 AodbData = DateTime.Parse(order.CreatedAt).Date,
                 AodbNazwadok = "ZA",
-                AodbNrdok = "APILO_" + order.Id,
+                AodbNrdok = "APILO" + idConnection + "_" + order.Id,
                 AodbSuma = float.Parse(order.OriginalAmountTotalWithTax, System.Globalization.CultureInfo.InvariantCulture),
                 AodbIlepoz = order.OrderItems.Count(),
                 AodbCecha1 = order.IdExternal,
@@ -267,7 +270,7 @@ public class OrderService : IOrderService
             string uwagi = $"### Dane wysyłki ###\n" +
                            $"{order.AddressDelivery.Name}\n" +
                            $"{order.AddressDelivery.StreetName} {order.AddressDelivery.StreetNumber}\n" +
-                           $"{order.AddressDelivery.City} {order.AddressDelivery.City} {order.AddressDelivery.Country}\n" +
+                           $"{order.AddressDelivery.City} {order.AddressDelivery.Country}\n" +
                            $"{order.AddressDelivery.Phone}\n" +
                            $"{order.AddressDelivery.Email}\n" +
                            $"{order.AddressDelivery.ParcelName}";
@@ -287,7 +290,8 @@ public class OrderService : IOrderService
             try
             {
                 var nagl = await context.Nagl.FirstOrDefaultAsync(n => n.IdNagl == urzzewnaglRealizZamwew.AidNagl);
-                nagl.Napodstawie = order.Id;
+                nagl.Napodstawie = $"{order.Id} - {order.CustomerLogin}";
+                nagl.Uwagi = uwagi;
 
                 context.Nagl.Update(nagl);
                 await context.SaveChangesAsync();
@@ -303,6 +307,21 @@ public class OrderService : IOrderService
                 {
                     var naglzamodb =  await context.Naglzamodb.FirstOrDefaultAsync(n => n.IdNagl == urzzewnaglRealizZamwew.AidNagl);
                     naglzamodb.IdDefdokwyst = 50;
+                    context.Naglzamodb.Update(naglzamodb);
+                    await context.SaveChangesAsync();
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex.Message);
+                }
+            }
+            
+            if (order.PlatformAccountId == 11) // Tylko dla AAmo
+            {
+                try
+                {
+                    var naglzamodb =  await context.Naglzamodb.FirstOrDefaultAsync(n => n.IdNagl == urzzewnaglRealizZamwew.AidNagl);
+                    naglzamodb.IdDefdokwyst = 10246;
                     context.Naglzamodb.Update(naglzamodb);
                     await context.SaveChangesAsync();
                 }

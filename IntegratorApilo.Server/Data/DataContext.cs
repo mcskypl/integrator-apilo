@@ -1,4 +1,5 @@
-﻿using FirebirdSql.Data.FirebirdClient;
+﻿using System.Globalization;
+using FirebirdSql.Data.FirebirdClient;
 
 namespace IntegratorApilo.Server.Data;
 
@@ -41,6 +42,8 @@ public class DataContext : DbContext
         modelBuilder.Entity<Urzzewnagl>().HasKey(e => e.IdUrzzewnagl);
         modelBuilder.Entity<Nagl>().HasKey(e => e.IdNagl);
         modelBuilder.Entity<Naglzamodb>().HasKey(e => e.IdNaglzamodb);
+        
+        modelBuilder.Entity<BlankOutput>().HasNoKey();
     }
 
     // Tables
@@ -186,6 +189,100 @@ public class DataContext : DbContext
 
         UrzzewnaglRealizZam? results = await UrzzewnaglRealizZams
             .FromSqlRaw("SELECT * FROM URZZEWNAGL_REALIZ_ZAM(@AID_URZZEWNAGL, @KASUJURZZEWNAGL)", @params)
+            .FirstOrDefaultAsync();
+
+        return results;
+    }
+    
+    
+    public DbSet<BlankOutput> EshopImpFvs { get; set; }
+    
+    public async Task<BlankOutput?> EshopImpFv(Document document)
+    {
+        DateTime dateTime = DateTime.Parse(document.InvoicedAt);
+        DateTime unixEpoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+        long secondsSinceUnixEpoch = (long)(dateTime.ToUniversalTime() - unixEpoch).TotalSeconds;
+        
+        FbParameter[] @params =  {
+              new FbParameter("@INVOICE_ID", document.Id),
+    new FbParameter("@ORDER_ID", document.Id), // Użyj DBNull.Value zamiast null dla wartości SQL NULL
+    new FbParameter("@SERIES_ID", DBNull.Value),
+    new FbParameter("@TYPE", DBNull.Value),
+    new FbParameter("@NUMBER", document.DocumentNumber),
+    new FbParameter("@SUB_ID", DBNull.Value),
+    new FbParameter("@MONTH", DBNull.Value),
+    new FbParameter("@YEAR", DBNull.Value),
+    new FbParameter("@POSTFIX", DBNull.Value),
+    new FbParameter("@DATE_ADD", secondsSinceUnixEpoch),
+    new FbParameter("@DATE_SELL", DBNull.Value),
+    new FbParameter("@DATE_PAY_TO", DBNull.Value),
+    new FbParameter("@CURRENCY", DBNull.Value),
+    new FbParameter("@TOTAL_PRICE_BRUTTO", document.OriginalAmountTotalWithTax),
+    new FbParameter("@TOTAL_PRICE_NETTO", document.OriginalAmountTotalWithoutTax),
+    new FbParameter("@PAYMENT", DBNull.Value),
+    new FbParameter("@ADDITIONAL_INFO", DBNull.Value),
+    new FbParameter("@INVOICE_FULLNAME", document.DocumentReceiver.Name),
+    new FbParameter("@INVOICE_COMPANY", document.DocumentReceiver.CompanyName),
+    new FbParameter("@INVOICE_NIP", document.DocumentReceiver.CompanyTaxNumber),
+    new FbParameter("@INVOICE_ADDRESS", document.DocumentReceiver.StreetName + " " + document.DocumentReceiver.StreetNumber),
+    new FbParameter("@INVOICE_POSTCODE", document.DocumentReceiver.ZipCode),
+    new FbParameter("@INVOICE_CITY", document.DocumentReceiver.City),
+    new FbParameter("@INVOICE_COUNTRY", document.DocumentReceiver.Country),
+    new FbParameter("@INVOICE_COUNTRY_CODE", DBNull.Value),
+    new FbParameter("@SELLER", DBNull.Value),
+    new FbParameter("@CORRECTING_TO_INVOICE_ID", DBNull.Value),
+    new FbParameter("@CORRECTING_REASON", DBNull.Value),
+    new FbParameter("@CORRECTING_ITEMS", DBNull.Value),
+    new FbParameter("@CORRECTING_DATA", DBNull.Value),
+    new FbParameter("@EXTERNAL_INVOICE_NUMBER", DBNull.Value),
+    new FbParameter("@EXCHANGE_CURRENCY", DBNull.Value),
+    new FbParameter("@EXCHANGE_RATE", DBNull.Value),
+    new FbParameter("@EXCHANGE_DATE", DBNull.Value),
+    new FbParameter("@EXCHANGE_INFO", DBNull.Value),
+    new FbParameter("@EXTERNAL_ID", DBNull.Value),
+    new FbParameter("@NAZWA_DOK", "FA")
+        };
+
+        BlankOutput? results = await EshopImpFvs
+            .FromSqlRaw("SELECT * FROM XXX_ESHOP_IMP_BL_FV(@INVOICE_ID, @ORDER_ID, @SERIES_ID, @TYPE, @NUMBER, @SUB_ID, @MONTH, @YEAR, @POSTFIX, @DATE_ADD, @DATE_SELL, @DATE_PAY_TO, @CURRENCY, @TOTAL_PRICE_BRUTTO, @TOTAL_PRICE_NETTO, @PAYMENT, @ADDITIONAL_INFO, @INVOICE_FULLNAME, @INVOICE_COMPANY, @INVOICE_NIP, @INVOICE_ADDRESS, @INVOICE_POSTCODE, @INVOICE_CITY, @INVOICE_COUNTRY, @INVOICE_COUNTRY_CODE, @SELLER, @CORRECTING_TO_INVOICE_ID, @CORRECTING_REASON, @CORRECTING_ITEMS, @CORRECTING_DATA, @EXTERNAL_INVOICE_NUMBER, @EXCHANGE_CURRENCY, @EXCHANGE_RATE, @EXCHANGE_DATE, @EXCHANGE_INFO, @EXTERNAL_ID, @NAZWA_DOK)", @params)
+            .FirstOrDefaultAsync();
+
+        return results;
+    }
+    
+    
+    public DbSet<BlankOutput> EshopImpFvItems { get; set; }
+    
+    public async Task<BlankOutput?> EshopImpFvItem(DocumentItem documentItem, int documentId)
+    {
+        string taxString = documentItem.Tax;
+        
+        // Upewnij się, że ciąg znaków nie zawiera nieoczekiwanych znaków ani spacji
+        taxString = taxString.Trim();
+
+        // Określenie kultury z kropką jako separatorem dziesiętnym
+        CultureInfo culture = CultureInfo.InvariantCulture;
+
+        double taxDouble = double.Parse(taxString, culture);
+        int tax = (int)taxDouble;
+        
+        FbParameter[] @params =  {
+                new FbParameter("@ORDER_ID", documentId),
+                new FbParameter("@NAME", documentItem.Name),
+                new FbParameter("@SKU", documentItem.Sku),
+                new FbParameter("@EAN", documentItem.Ean),
+                new FbParameter("@PRICE_BRUTTO", 13),
+                new FbParameter("@PRICE_NETTO", 11),
+                new FbParameter("@TAX_RATE", tax),
+                new FbParameter("@QUANTITY", 1),
+                new FbParameter("@IS_SHIPMENT", DBNull.Value),
+                new FbParameter("@NAZWA_DOK", "FA"),
+                new FbParameter("@KOREKTA", 0),
+                
+        };
+
+        BlankOutput? results = await EshopImpFvItems
+            .FromSqlRaw("SELECT * FROM XXX_ESHOP_IMP_BL_FV_ITEMS(@ORDER_ID, @NAME, @SKU, @EAN, @PRICE_BRUTTO, @PRICE_NETTO, @TAX_RATE, @QUANTITY, @IS_SHIPMENT, @NAZWA_DOK, @KOREKTA)", @params)
             .FirstOrDefaultAsync();
 
         return results;
