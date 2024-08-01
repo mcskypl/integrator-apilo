@@ -35,7 +35,9 @@ public class InvoiceService : IInvoiceService
 
                 foreach (var database in shop.ApiloConnections)
                 {
-                    if (database.SyncInvoices == 0) continue;
+                    // if (database.DatabaseName != "ALBO") continue;
+                    
+                    // if (database.SyncInvoices == 0) continue;
 
                     _logger.LogInformation($"Synchronizacja faktur z bazą: {database.DatabaseName}");
                     ConnectionString = database.ConnectionString;
@@ -44,6 +46,29 @@ public class InvoiceService : IInvoiceService
                     var listOfAccountingDocuments = await _apiloFinanceDocumentService.GetListOfAccountingDocuments(shop.IdShop);
                     _logger.LogInformation($"Pobrano dokumentów: {listOfAccountingDocuments.Data.Documents.Count()}");
 
+                    foreach (var document in listOfAccountingDocuments.Data.Documents)
+                    {
+                        try
+                        {
+                            using (DataContext context = new DataContext(database.ConnectionString))
+                            {
+                                await context.EshopImpFv(document);
+                                
+                                foreach (var item in document.DocumentItems)
+                                {
+                                    var asdasd = await context.EshopImpFvItem(item, document.Id);
+                                    await context.SaveChangesAsync();
+                                }
+                            }
+
+                            
+                        }
+                        catch (Exception ex)
+                        {
+                            
+                        }
+                        
+                    }
 
                 }
             }

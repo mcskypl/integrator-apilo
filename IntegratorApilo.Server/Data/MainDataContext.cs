@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using FirebirdSql.Data.FirebirdClient;
+using Microsoft.EntityFrameworkCore;
 
 namespace IntegratorApilo.Server.Data;
 
@@ -163,6 +164,8 @@ public class MainDataContext : DbContext
             entity.Property(e => e.Name).HasMaxLength(255);
             entity.Property(e => e.Description).HasMaxLength(255);
         });
+        
+        
     }
 
     public DbSet<ApiloSetting> ApiloSetting { get; set; }
@@ -171,5 +174,7 @@ public class MainDataContext : DbContext
     public DbSet<ApiloAccount> ApiloAccount { get; set; }
     public DbSet<ApiloShopSetting> ApiloShopSetting { get; set; }
     public DbSet<ApiloOrderStatus> ApiloOrderStatus { get; set; }
+    
+    
     
 }

@@ -1,5 +1,6 @@
 ﻿using IntegratorApilo.Server.Services.ApiloFinanceDocumentService;
 using IntegratorApilo.Server.Services.ApiloOrderService;
+using IntegratorApilo.Server.Services.InvoiceService;
 using IntegratorApilo.Shared.Streamsoft;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -15,16 +16,19 @@ public class ApiloController : ControllerBase
     private readonly IApiloOrderService _apiloOrderService;
     private readonly IApiloWarehouseService _apiloWarehouseService;
     private readonly IApiloFinanceDocumentService _apiloFinanceDocumentService;
+    private readonly IInvoiceService _invoiceService;
 
     public ApiloController(IApiloAuthorizationService apiloAuthorizationService
                          , IApiloOrderService apiloOrderService
                          , IApiloWarehouseService apiloWarehouseService
-                         , IApiloFinanceDocumentService apiloFinanceDocumentService)
+                         , IApiloFinanceDocumentService apiloFinanceDocumentService
+                         , IInvoiceService invoiceService)
     {
         _apiloAuthorizationService = apiloAuthorizationService;
         _apiloOrderService = apiloOrderService;
         _apiloWarehouseService = apiloWarehouseService;
         _apiloFinanceDocumentService = apiloFinanceDocumentService;
+        _invoiceService = invoiceService;
     }
 
     [HttpGet]
@@ -72,6 +76,14 @@ public class ApiloController : ControllerBase
     public async Task<ActionResult<ServiceResponse<List<ApiloProduct>>>> GetFinanceDocuments(int idShop)
     {
         var result = await _apiloFinanceDocumentService.GetListOfAccountingDocuments(idShop);
+        return Ok(result);
+    }
+    
+    [HttpPost]
+    [Route("finance-documents")]
+    public async Task<ActionResult<ServiceResponse<List<ApiloProduct>>>> AddFinanceDocuments()
+    {
+        var result = await _invoiceService.Init();
         return Ok(result);
     }
 }
