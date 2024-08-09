@@ -197,7 +197,7 @@ public class DataContext : DbContext
     
     public DbSet<BlankOutput> EshopImpFvs { get; set; }
     
-    public async Task<BlankOutput?> EshopImpFv(Document document)
+    public async Task<BlankOutput?> EshopImpFv(Document document, string kodurzzew)
     {
         DateTime dateTime = DateTime.Parse(document.InvoicedAt);
         DateTime unixEpoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
@@ -240,11 +240,12 @@ public class DataContext : DbContext
     new FbParameter("@EXCHANGE_DATE", DBNull.Value),
     new FbParameter("@EXCHANGE_INFO", DBNull.Value),
     new FbParameter("@EXTERNAL_ID", DBNull.Value),
-    new FbParameter("@NAZWA_DOK", "FA")
+    new FbParameter("@NAZWA_DOK", "FA"),
+    new FbParameter("@KODURZZEW", kodurzzew)
         };
 
         BlankOutput? results = await EshopImpFvs
-            .FromSqlRaw("SELECT * FROM XXX_ESHOP_IMP_BL_FV(@INVOICE_ID, @ORDER_ID, @SERIES_ID, @TYPE, @NUMBER, @SUB_ID, @MONTH, @YEAR, @POSTFIX, @DATE_ADD, @DATE_SELL, @DATE_PAY_TO, @CURRENCY, @TOTAL_PRICE_BRUTTO, @TOTAL_PRICE_NETTO, @PAYMENT, @ADDITIONAL_INFO, @INVOICE_FULLNAME, @INVOICE_COMPANY, @INVOICE_NIP, @INVOICE_ADDRESS, @INVOICE_POSTCODE, @INVOICE_CITY, @INVOICE_COUNTRY, @INVOICE_COUNTRY_CODE, @SELLER, @CORRECTING_TO_INVOICE_ID, @CORRECTING_REASON, @CORRECTING_ITEMS, @CORRECTING_DATA, @EXTERNAL_INVOICE_NUMBER, @EXCHANGE_CURRENCY, @EXCHANGE_RATE, @EXCHANGE_DATE, @EXCHANGE_INFO, @EXTERNAL_ID, @NAZWA_DOK)", @params)
+            .FromSqlRaw("SELECT * FROM XXX_APILO_IMP_FV(@INVOICE_ID, @ORDER_ID, @SERIES_ID, @TYPE, @NUMBER, @SUB_ID, @MONTH, @YEAR, @POSTFIX, @DATE_ADD, @DATE_SELL, @DATE_PAY_TO, @CURRENCY, @TOTAL_PRICE_BRUTTO, @TOTAL_PRICE_NETTO, @PAYMENT, @ADDITIONAL_INFO, @INVOICE_FULLNAME, @INVOICE_COMPANY, @INVOICE_NIP, @INVOICE_ADDRESS, @INVOICE_POSTCODE, @INVOICE_CITY, @INVOICE_COUNTRY, @INVOICE_COUNTRY_CODE, @SELLER, @CORRECTING_TO_INVOICE_ID, @CORRECTING_REASON, @CORRECTING_ITEMS, @CORRECTING_DATA, @EXTERNAL_INVOICE_NUMBER, @EXCHANGE_CURRENCY, @EXCHANGE_RATE, @EXCHANGE_DATE, @EXCHANGE_INFO, @EXTERNAL_ID, @NAZWA_DOK, @KODURZZEW)", @params)
             .FirstOrDefaultAsync();
 
         return results;

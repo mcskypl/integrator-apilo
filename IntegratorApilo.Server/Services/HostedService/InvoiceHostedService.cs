@@ -1,4 +1,6 @@
-﻿namespace IntegratorApilo.Server.Services.HostedService;
+﻿using IntegratorApilo.Server.Services.InvoiceService;
+
+namespace IntegratorApilo.Server.Services.HostedService;
 
 public class InvoiceHostedService : BackgroundService
 {
@@ -15,8 +17,8 @@ public class InvoiceHostedService : BackgroundService
         {
             try
             {
-                //var orderService = scope.ServiceProvider.GetRequiredService<IOrderService>();
-                //await orderService.Init();
+                var orderService = scope.ServiceProvider.GetRequiredService<IInvoiceService>();
+                await orderService.Init();
             }
             catch (Exception ex)
             {

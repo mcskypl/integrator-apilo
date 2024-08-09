@@ -73,9 +73,9 @@ public class ApiloController : ControllerBase
 
     [HttpGet]
     [Route("finance-documents")]
-    public async Task<ActionResult<ServiceResponse<List<ApiloProduct>>>> GetFinanceDocuments(int idShop)
+    public async Task<ActionResult<ServiceResponse<List<ApiloProduct>>>> GetFinanceDocuments(int idShop, int offset)
     {
-        var result = await _apiloFinanceDocumentService.GetListOfAccountingDocuments(idShop);
+        var result = await _apiloFinanceDocumentService.GetListOfAccountingDocuments(idShop, offset);
         return Ok(result);
     }
     

@@ -2,5 +2,5 @@
 
 public interface IApiloFinanceDocumentService
 {
-    Task<ServiceResponse<ApiloDocuments>> GetListOfAccountingDocuments(int idShop);
+    Task<ServiceResponse<ApiloDocuments>> GetListOfAccountingDocuments(int idShop, int offset);
 }

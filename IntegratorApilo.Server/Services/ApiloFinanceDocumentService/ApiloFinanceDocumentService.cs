@@ -14,7 +14,7 @@ public class ApiloFinanceDocumentService : IApiloFinanceDocumentService
         _mainDataContext = mainDataContext;
     }
 
-    public async Task<ServiceResponse<ApiloDocuments>> GetListOfAccountingDocuments(int idShop)
+    public async Task<ServiceResponse<ApiloDocuments>> GetListOfAccountingDocuments(int idShop, int offset)
     {
         var result = new ServiceResponse<ApiloDocuments>();
 
@@ -25,8 +25,10 @@ public class ApiloFinanceDocumentService : IApiloFinanceDocumentService
             string apiAddress = shopSettings.FirstOrDefault(s => s.IdSetting == 10001).StringValue;
             string accessToken = shopSettings.FirstOrDefault(s => s.IdSetting == 10005).StringValue;
 
-            var request = new RestRequest($"{apiAddress}/rest/api/finance/documents/", Method.Get);
+            var request = new RestRequest($"{apiAddress}/rest/api/finance/documents/?type=1", Method.Get);
             request.AddHeader("Authorization", $"Bearer {accessToken}");
+            request.AddParameter("limit", 512);
+            request.AddParameter("offset", offset);
 
             RestResponse response = await _restClient.ExecuteAsync(request);
 
